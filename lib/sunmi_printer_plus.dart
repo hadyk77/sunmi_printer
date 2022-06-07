@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'column_maker.dart';
@@ -166,6 +167,8 @@ class SunmiPrinter {
       "width": width,
       "align": align,
     };
+
+    debugPrint("data:$args");
     await _channel.invokeMethod("PRINT_ROW", args);
   }
 
