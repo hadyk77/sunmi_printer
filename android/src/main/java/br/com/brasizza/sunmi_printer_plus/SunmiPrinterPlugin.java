@@ -237,28 +237,20 @@ public class SunmiPrinterPlugin implements FlutterPlugin, MethodCallHandler {
         result.success(sunmiPrinterMethod.drawerStatus());
       break;  
       case "PRINT_ROW":
-        String colsStr = call.argument("cols");
+        HashMap<String,Object>args= call.arguments();
+        final ArrayList<String> textList= (ArrayList<String>) args.get("texts");
+        final ArrayList<Integer> widthList = (ArrayList<Integer>) args.get("width");
+        final ArrayList<Integer> alignList = (ArrayList<Integer>) args.get("align");
 
-        try {
-          JSONArray cols = new JSONArray(colsStr);
-          String[] colsText = new String[cols.length()];
-          int[] colsWidth = new int[cols.length()];
-          int[] colsAlign = new int[cols.length()];
-          for (int i = 0; i < cols.length(); i++) {
-            JSONObject col = cols.getJSONObject(i);
-            String textColumn = col.getString("text");
-            int widthColumn = col.getInt("width");
-            int alignColumn = col.getInt("align");
-            colsText[i] = textColumn;
-            colsWidth[i] = widthColumn;
-            colsAlign[i] = alignColumn;
-          }
 
-          sunmiPrinterMethod.printColumn(colsText, colsWidth, colsAlign);
-          result.success(true);
-        } catch (Exception err) {
-          Log.d("SunmiPrinter", err.getMessage());
-        }
+
+        String[] texts = new String[textList.size()];
+        texts = textList.toArray(texts);
+        int[] _width=toIntArray(widthList);
+        int[] _align=toIntArray(alignList);
+
+        sunmiPrinterMethod.printColumn(texts,_width,_align);
+        result.success(true);
         break;
       case "EXIT_PRINTER_BUFFER":
         Boolean clearExit = call.argument("clearExit");
@@ -322,6 +314,13 @@ public class SunmiPrinterPlugin implements FlutterPlugin, MethodCallHandler {
         result.notImplemented();
         break;
     }
+  }
+  int[] toIntArray(ArrayList<Integer> list)  {
+    int[] ret = new int[list.size()];
+    int i = 0;
+    for (Integer e : list)
+      ret[i++] = e;
+    return ret;
   }
 
   @Override
