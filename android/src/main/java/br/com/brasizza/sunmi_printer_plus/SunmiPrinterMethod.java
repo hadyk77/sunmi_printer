@@ -11,6 +11,11 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.sunmi.peripheral.printer.InnerPrinterCallback;
+import com.sunmi.peripheral.printer.InnerPrinterException;
+import com.sunmi.peripheral.printer.InnerPrinterManager;
+import com.sunmi.peripheral.printer.SunmiPrinterService;
+
 import java.util.ArrayList;
 
 import woyou.aidlservice.jiuiv5.*;
@@ -23,11 +28,29 @@ public class SunmiPrinterMethod {
     private final String TAG = SunmiPrinterMethod.class.getSimpleName();
     private ArrayList<Boolean> _printingText = new ArrayList<Boolean>();
     private IWoyouService _woyouService;
+    private SunmiPrinterService _sunmiService;
     private Context _context;
 
     public SunmiPrinterMethod(Context context) {
         this._context = context;
     }
+    private InnerPrinterCallback innerPrinterCallback = new InnerPrinterCallback() {
+        @Override
+        protected void onConnected(SunmiPrinterService service) {
+
+
+            _sunmiService = service;
+
+        }
+
+        @Override
+        protected void onDisconnected() {
+            _sunmiService = null;
+
+        }
+    };
+
+
 
     private ServiceConnection connService = new ServiceConnection() {
         @Override
@@ -70,10 +93,17 @@ public class SunmiPrinterMethod {
     };
 
     public void bindPrinterService() {
-        Intent intent = new Intent();
-        intent.setPackage("woyou.aidlservice.jiuiv5");
-        intent.setAction("woyou.aidlservice.jiuiv5.IWoyouService");
-        _context.bindService(intent, connService, Context.BIND_AUTO_CREATE);
+        try {
+            Intent intent = new Intent();
+            intent.setPackage("woyou.aidlservice.jiuiv5");
+            intent.setAction("woyou.aidlservice.jiuiv5.IWoyouService");
+            _context.bindService(intent, connService, Context.BIND_AUTO_CREATE);
+            InnerPrinterManager.getInstance().bindService(_context,
+                    innerPrinterCallback);
+        }
+        catch (InnerPrinterException e){
+            e.printStackTrace();
+        }
     }
 
     public void unbindPrinterService() {
@@ -169,12 +199,7 @@ public class SunmiPrinterMethod {
 
         try {
 
-            _woyouService.printColumnsText(
-                    stringColumns,
-                    columnWidth,
-                    columnAlignment,
-                    this._callback()
-            );
+            _sunmiService.printColumnsString(stringColumns,columnWidth,columnAlignment,null);
 
             return true;
         } catch (RemoteException e) {

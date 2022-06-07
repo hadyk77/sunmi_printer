@@ -1,11 +1,11 @@
+import 'dart:async';
 import 'dart:typed_data';
+
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sunmi_printer_plus/column_maker.dart';
 import 'package:sunmi_printer_plus/enums.dart';
-import 'dart:async';
-
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
 import 'package:sunmi_printer_plus/sunmi_style.dart';
 
@@ -119,32 +119,41 @@ class _HomeState extends State<Home> {
                   children: [
                     ElevatedButton(
                         onPressed: () async {
+                          await SunmiPrinter.bindingPrinter();
                           await SunmiPrinter.initPrinter();
-                          await SunmiPrinter.startTransactionPrint(true);
-                          await SunmiPrinter.printQRCode(
-                              'https://github.com/brasizza/sunmi_printer');
-                          await SunmiPrinter.lineWrap(2);
-                          await SunmiPrinter.exitTransactionPrint(true);
-                        },
-                        child: const Text('Print qrCode')),
-                    ElevatedButton(
-                        onPressed: () async {
-                          await SunmiPrinter.initPrinter();
-                          await SunmiPrinter.startTransactionPrint(true);
-                          await SunmiPrinter.printBarCode('1234567890',
-                              barcodeType: SunmiBarcodeType.CODE128,
-                              textPosition: SunmiBarcodeTextPos.TEXT_UNDER,
-                              height: 20);
-                          await SunmiPrinter.lineWrap(2);
-                          await SunmiPrinter.exitTransactionPrint(true);
-                        },
-                        child: const Text('Print barCode')),
-                    ElevatedButton(
-                        onPressed: () async {
-                          await SunmiPrinter.initPrinter();
-                          await SunmiPrinter.startTransactionPrint(true);
+                          await SunmiPrinter.setAlignment(
+                              SunmiPrintAlign.RIGHT);
+                          await SunmiPrinter.bold();
+
+                          await SunmiPrinter.printRow(cols: [
+                            ColumnMaker(
+                              text: "الكمية",
+                              align: SunmiPrintAlign.LEFT,
+                              width: 10,
+                            ),
+                            ColumnMaker(
+                              text: "السعر",
+                              align: SunmiPrintAlign.CENTER,
+                              width: 10,
+                            ),
+                            ColumnMaker(
+                              text: "الصنف",
+                              align: SunmiPrintAlign.RIGHT,
+                              width: 10,
+                            ),
+                          ]);
                           await SunmiPrinter.line();
-                          await SunmiPrinter.lineWrap(2);
+
+                          // await SunmiPrinter.printText("السلام عليكم",
+                          //     style: SunmiStyle(fontSize: SunmiFontSize.XL));
+
+                          // await SunmiPrinter.setAlignment(SunmiPrintAlign.RIGHT);
+
+                          // await SunmiPrinter.printQRCode("hady mohamed", size: 9);
+                          await SunmiPrinter.lineWrap(4);
+                          await SunmiPrinter.cut();
+                          await SunmiPrinter
+                              .submitTransactionPrint(); // SUBMIT and cut paper
                           await SunmiPrinter.exitTransactionPrint(true);
                         },
                         child: const Text('Print line')),

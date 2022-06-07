@@ -38,3 +38,7 @@ android {
         disable 'InvalidPackage'
     }
 }
+dependencies {
+    implementation 'com.sunmi:printerlibrary:1.0.18'
+
+}
