@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 
 import 'column_maker.dart';
@@ -158,15 +158,12 @@ class SunmiPrinter {
   ///
   ///This method will print a row based in a list of [ColumnMaker].
   static Future<void> printRow({required List<ColumnMaker> cols}) async {
-    final text = cols.map((e) => e.text).toList();
-    final width = cols.map((e) => e.width).toList();
-    final align = cols.map((e) => e.align.index).toList();
-    final args = <String, dynamic>{
-      "texts": text,
-      "width": width,
-      "align": align,
+    final _jsonCols = List<Map<String, String>>.from(
+        cols.map<Map<String, String>>((ColumnMaker col) => col.toJson()));
+    Map<String, dynamic> arguments = <String, dynamic>{
+      "cols": json.encode(_jsonCols)
     };
-    await _channel.invokeMethod("PRINT_ROW", args);
+    await _channel.invokeMethod("PRINT_ROW", arguments);
   }
 
   ///*printRawData*
